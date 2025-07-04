@@ -1,0 +1,19 @@
+[package]
+name = "rollthetech"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "rollthetech"
+
+[dependencies]
+reqwest = "0.12.22"
+nanorand = "0.8.0"
+markdown = "1.0.0"
+crossterm = "0.29.0"
+tokio = { version = "1.46.0", features = ["full"] }
+anyhow = "1.0.98"
+thiserror = "2.0.12"
+tempera = "0.1.1"
+spinners = "4.1.1"
+arguably = "2.2.0"
