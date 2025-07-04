@@ -39,7 +39,7 @@ fn roll_die<S: AsRef<str> + fmt::Display>(n: usize, msg: S, hide_spinner: bool) 
   if !hide_spinner {
     let mut spin = Spinner::new(Spinners::Dots, format!("{msg} (d{n})"));
     std::thread::sleep(Duration::from_millis(500)); // fake delay, just for fun
-    spin.stop_with_newline();
+    spin.stop();
   }
 
   rng.generate_range(0..n)
@@ -143,12 +143,18 @@ async fn main() -> Result<()> {
     parser.found("fast"),
   );
   let category = categories.keys().nth(category_idx).unwrap().as_str();
+  println!(
+    "{}",
+    tempera::colorize_template(&format!(" → {{bold}}{{italic}}{category}{{-}}"))
+  );
+
   let projects = &categories[category];
   let project_idx = roll_die(
     projects.len(),
     "Deciding a project...",
     parser.found("fast"),
   );
+  println!();
 
   println!("{}", tempera::colorize_template(&projects[project_idx]));
 
