@@ -4,12 +4,11 @@ use std::time::Duration;
 
 use anyhow::Result;
 use arguably::ArgParser;
+use markdown::{mdast::Node, ParseOptions};
+use thiserror::Error as ThisError;
 
 const MD_URL: &str =
   "https://github.com/codecrafters-io/build-your-own-x/raw/refs/heads/master/README.md";
-
-use markdown::{mdast::Node, ParseOptions};
-use thiserror::Error as ThisError;
 
 #[derive(Debug, ThisError)]
 enum RollError {
@@ -48,13 +47,14 @@ fn roll_die<S: AsRef<str> + fmt::Display>(n: usize, msg: S, show_spinner: bool) 
 #[tokio::main]
 async fn main() -> Result<()> {
   let mut parser = ArgParser::new()
-    .helptext("Usage: rollthetech ...")
+    .helptext("Usage: rollthetech [--compact, -c]")
     .version("0.1")
-    .flag("fast f");
+    .flag("compact c");
 
   if let Err(err) = parser.parse() {
     err.exit();
   }
+  let compact = parser.found("compact");
 
   let md_text = download_md().await?;
   let ast = markdown::to_mdast(&md_text, &ParseOptions::default()).or(Err(RollError::Parse))?;
@@ -137,13 +137,9 @@ async fn main() -> Result<()> {
     }
   }
 
-  let category_idx = roll_die(
-    categories.keys().len(),
-    "Deciding a category... ",
-    !parser.found("fast"),
-  );
+  let category_idx = roll_die(categories.keys().len(), "Deciding a category... ", !compact);
   let category = categories.keys().nth(category_idx).unwrap().as_str();
-  if !parser.found("fast") {
+  if !compact {
     println!(
       "{}",
       tempera::colorize_template(&format!(" → {{bold}}{{italic}}{category}{{-}}"))
@@ -151,16 +147,20 @@ async fn main() -> Result<()> {
   };
 
   let projects = &categories[category];
-  let project_idx = roll_die(
-    projects.len(),
-    "Deciding a project...",
-    !parser.found("fast"),
-  );
-  if !parser.found("fast") {
+  let project_idx = roll_die(projects.len(), "Deciding a project...", !compact);
+  if !compact {
     println!();
   }
 
-  println!("{}", tempera::colorize_template(&projects[project_idx]));
+  println!(
+    "{}{}",
+    if compact {
+      tempera::colorize_template(&format!("{{italic}}({category}) {{-}}"))
+    } else {
+      String::new()
+    },
+    tempera::colorize_template(&projects[project_idx])
+  );
 
   Ok(())
 }
