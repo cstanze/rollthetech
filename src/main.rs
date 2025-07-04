@@ -143,10 +143,12 @@ async fn main() -> Result<()> {
     parser.found("fast"),
   );
   let category = categories.keys().nth(category_idx).unwrap().as_str();
-  println!(
-    "{}",
-    tempera::colorize_template(&format!(" → {{bold}}{{italic}}{category}{{-}}"))
-  );
+  if parser.found("fast") {
+    println!(
+      "{}",
+      tempera::colorize_template(&format!(" → {{bold}}{{italic}}{category}{{-}}"))
+    )
+  };
 
   let projects = &categories[category];
   let project_idx = roll_die(
@@ -154,7 +156,9 @@ async fn main() -> Result<()> {
     "Deciding a project...",
     parser.found("fast"),
   );
-  println!();
+  if parser.found("fast") {
+    println!();
+  }
 
   println!("{}", tempera::colorize_template(&projects[project_idx]));
 
