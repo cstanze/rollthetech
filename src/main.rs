@@ -31,15 +31,15 @@ async fn download_md() -> Result<String, RollError> {
 
 /// Roll a dn where n -> # of sides on die
 /// e.g. roll_die(6) rolls a d6
-fn roll_die<S: AsRef<str> + fmt::Display>(n: usize, msg: S, hide_spinner: bool) -> usize {
+fn roll_die<S: AsRef<str> + fmt::Display>(n: usize, msg: S, show_spinner: bool) -> usize {
   use nanorand::{Rng, WyRand};
   use spinners::{Spinner, Spinners};
   let mut rng = WyRand::new();
 
-  if !hide_spinner {
-    let mut spin = Spinner::new(Spinners::Dots, format!("{msg} (d{n})"));
+  if show_spinner {
+    let mut spinner = Spinner::new(Spinners::Dots, format!("{msg} (d{n})"));
     std::thread::sleep(Duration::from_millis(500)); // fake delay, just for fun
-    spin.stop();
+    spinner.stop();
   }
 
   rng.generate_range(0..n)
@@ -140,10 +140,10 @@ async fn main() -> Result<()> {
   let category_idx = roll_die(
     categories.keys().len(),
     "Deciding a category... ",
-    parser.found("fast"),
+    !parser.found("fast"),
   );
   let category = categories.keys().nth(category_idx).unwrap().as_str();
-  if parser.found("fast") {
+  if !parser.found("fast") {
     println!(
       "{}",
       tempera::colorize_template(&format!(" → {{bold}}{{italic}}{category}{{-}}"))
@@ -154,9 +154,9 @@ async fn main() -> Result<()> {
   let project_idx = roll_die(
     projects.len(),
     "Deciding a project...",
-    parser.found("fast"),
+    !parser.found("fast"),
   );
-  if parser.found("fast") {
+  if !parser.found("fast") {
     println!();
   }
 
